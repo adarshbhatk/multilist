@@ -28,9 +28,7 @@ const sleep = new Item ({
     name: "Sleep"
 });
 
-const items = [eat, code, sleep];
-
-// Item.insertMany(items);
+const defaultItems = [eat, code, sleep];
 
 const currentDate = new Date();
 
@@ -52,51 +50,50 @@ async function getListItems() {
   }
 
   app.get("/", async (req, res) => {
-    let items = [];
-    let result = await getListItems();
-    result.forEach((item) => {
-        items.push(item.name);
-        })
-    // console.log("Item names are: ", items);
-
-    res.render("index.ejs", {
-      listTitle: day,
-      listItems: items,
-    });
+    const items = await getListItems();
+    if(items.length === 0) {
+        Item.insertMany(defaultItems);
+        res.redirect("/");
+    } else {
+        res.render("index.ejs", {
+            listTitle: day,
+            listItems: items,
+          });
+    }
   });
   
-//   app.post("/add", async (req, res) => {
-//     const item = req.body.newItem;
-//     try {
-//       await db.query("INSERT INTO items (title) VALUES ($1);", [item]);
-//       res.redirect("/");
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   });
+  app.post("/add", async (req, res) => {
+    const item = new Item({
+        name: req.body.newItem
+    });
+    try {
+      item.save();
+      res.redirect("/");
+    } catch (error) {
+      console.log(error);
+    }
+  });
   
-//   app.post("/edit", async (req, res) => {
-//     const itemId = req.body.updatedItemId;
-//     const itemName = req.body.updatedItemTitle;
-//     // console.log("Updated item id and title are: ", itemId, itemName);
-//     try {
-//       await db.query("UPDATE items SET title = $1 WHERE id = $2;", [itemName, itemId]);
-//       res.redirect("/");
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   });
+  app.post("/edit", async (req, res) => {
+    const itemId = req.body.updatedItemId;
+    const itemName = req.body.updatedItemTitle;
+    try {
+      await Item.updateOne({_id: itemId}, {name: itemName});
+      res.redirect("/");
+    } catch (error) {
+      console.log(error);
+    }
+  });
   
-//   app.post("/delete", async (req, res) => {
-//     const id = req.body.deleteItemId;
-//     // console.log("Delete id: ", id);
-//     try {
-//       await db.query("DELETE FROM items WHERE id = $1;", [id]);
-//       res.redirect("/");
-//     } catch (error) {
-//       console.log(error);
-//     }
-//   });
+  app.post("/delete", async (req, res) => {
+    const itemId = req.body.deleteItemId;
+    try {
+      await Item.deleteOne({_id: itemId});
+      res.redirect("/");
+    } catch (error) {
+      console.log(error);
+    }
+  });
 
 app.listen(port, () => {
     console.log(`Server running on port ${port}`);    

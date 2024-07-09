@@ -10,21 +10,21 @@
     <% for(let item of listItems){%>
       <div class="item">
         <form action="/delete" method="post">
-          <input type="checkbox" onchange="this.form.submit()" name="deleteItemId" value="<%= item.id %>">
+          <input type="checkbox" onchange="this.form.submit()" name="deleteItemId" value="<%= item._id %>">
         </form>
 
-        <p id="title<%=item.id%>">
-          <%= item %>
+        <p id="title<%=item._id%>">
+          <%= item.name %>
         </p>
 
         <form class="edit" action="/edit" method="post">
-          <input type="hidden" name="updatedItemId" value="<%= item.id %>">
-          <input id="input<%=item.id%>" type="text" name="updatedItemTitle" value="<%= item.title %>" autocomplete="off"
+          <input type="hidden" name="updatedItemId" value="<%= item._id %>">
+          <input id="input<%=item._id%>" type="text" name="updatedItemTitle" value="<%= item.name %>" autocomplete="off"
             autofocus="true" hidden="true" />
-          <button id="done<%=item.id%>" class="edit" type="submit" hidden><img class="icon"
+          <button id="done<%=item._id%>" class="edit" type="submit" hidden><img class="icon"
               src="/assets/icons/check-solid.svg" alt="tick image"></button>
         </form>
-        <button id="edit<%=item.id%>" class="edit" onclick="handler('<%=item.id%>')"><img class="icon"
+        <button id="edit<%=item._id%>" class="edit" onclick="handler('<%=item._id%>')"><img class="icon"
             src="/assets/icons/pencil-solid.svg" alt="pencil image"></button>
       </div>
       <% } %>
