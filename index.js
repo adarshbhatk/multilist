@@ -125,12 +125,14 @@ async function getListItems() {
   
   app.post("/delete", async (req, res) => {
     const itemId = req.body.deleteItemId;
-    mongoose.connection.close();
-    try {
-      await Item.deleteOne({_id: itemId});
-      res.redirect("/");
-    } catch (error) {
-      console.log(error);
+    const listName = req.body.listName;
+
+    if(listName != day) {
+        await List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: itemId}}});
+            res.redirect("/" + listName);
+    } else {
+        await Item.deleteOne({_id: itemId});
+        res.redirect("/");
     }
   });
 

@@ -11,6 +11,7 @@
       <div class="item">
         <form action="/delete" method="post">
           <input type="checkbox" onchange="this.form.submit()" name="deleteItemId" value="<%= item._id %>">
+          <input type="hidden" name="listName" value="<%= listTitle %>">
         </form>
 
         <p id="title<%=item._id%>">
@@ -19,6 +20,7 @@
 
         <form class="edit" action="/edit" method="post">
           <input type="hidden" name="updatedItemId" value="<%= item._id %>">
+          <input type="hidden" name="listName" value="<%= listTitle %>">
           <input id="input<%=item._id%>" type="text" name="updatedItemTitle" value="<%= item.name %>" autocomplete="off"
             autofocus="true" hidden="true" />
           <button id="done<%=item._id%>" class="edit" type="submit" hidden><img class="icon"
