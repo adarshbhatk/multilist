@@ -30,6 +30,13 @@ const sleep = new Item ({
 
 const defaultItems = [eat, code, sleep];
 
+const listSchema = new mongoose.Schema({
+    name: String,
+    items: [itemsSchema]
+});
+
+const List = mongoose.model("List", listSchema);
+
 const currentDate = new Date();
 
 const options = { 
@@ -61,16 +68,47 @@ async function getListItems() {
           });
     }
   });
+
+  app.get("/:customRoute", async (req, res) => {
+    const customRoute = req.params.customRoute;
+
+    const foundList = await List.findOne({name: customRoute});
+    
+    if(!foundList) {
+        const list = new List({
+            name: customRoute,
+            items: defaultItems
+        });
+        list.save(); 
+        res.redirect("/" + customRoute);
+      } else {
+        res.render("index.ejs", {
+            listTitle: customRoute + " - " + day,
+            listItems: foundList.items,
+          });
+      }
+
+  });
   
   app.post("/add", async (req, res) => {
+    const itemName = req.body.newItem;
+    const listName = req.body.list;
     const item = new Item({
-        name: req.body.newItem
+        name: itemName
     });
-    try {
-      item.save();
-      res.redirect("/");
-    } catch (error) {
-      console.log(error);
+    if(listName != day) {
+        List.findOne({name: listName})
+        .then(foundList => {
+            foundList.items.push(item);
+            foundList.save();
+            res.redirect("/" + listName);
+        })
+        .catch(err => {
+            console.log(err);
+        });
+    } else {
+        item.save();
+        res.redirect("/");
     }
   });
   
@@ -87,6 +125,7 @@ async function getListItems() {
   
   app.post("/delete", async (req, res) => {
     const itemId = req.body.deleteItemId;
+    mongoose.connection.close();
     try {
       await Item.deleteOne({_id: itemId});
       res.redirect("/");
