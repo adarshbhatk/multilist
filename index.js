@@ -1,14 +1,19 @@
 import express from "express";
 import bodyParser from "body-parser";
 import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+
 
 const app = express();
 const port = 3000;
 
+dotenv.config();
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-mongoose.connect("mongodb://localhost:27017/todolistDB");
+mongoose.connect(`mongodb+srv://adarshbhatk:${process.env.MONGODB_PASSWORD}@todolist.d6ynjua.mongodb.net/?retryWrites=true&w=majority&appName=ToDoList`);
 
 const itemsSchema = new mongoose.Schema({
     name: String,
@@ -83,7 +88,7 @@ async function getListItems() {
         res.redirect("/" + customRoute);
       } else {
         res.render("index.ejs", {
-            listTitle: customRoute + " - " + day,
+            listTitle: customRoute,
             listItems: foundList.items,
           });
       }
@@ -115,12 +120,21 @@ async function getListItems() {
   app.post("/edit", async (req, res) => {
     const itemId = req.body.updatedItemId;
     const itemName = req.body.updatedItemTitle;
-    try {
-      await Item.updateOne({_id: itemId}, {name: itemName});
-      res.redirect("/");
-    } catch (error) {
-      console.log(error);
+    const listName = req.body.listName;
+
+    if(listName != day) {
+        const foundList = await List.findOne({name: listName});
+        console.log(foundList);
+        const itemToUpdate = foundList.items.id(itemId);
+        console.log(itemToUpdate);
+        itemToUpdate.name = itemName;
+        await foundList.save();
+        res.redirect("/" + listName);
+    } else {
+        await Item.updateOne({_id: itemId}, {name: itemName});
+        res.redirect("/");
     }
+
   });
   
   app.post("/delete", async (req, res) => {
@@ -129,7 +143,7 @@ async function getListItems() {
 
     if(listName != day) {
         await List.findOneAndUpdate({name: listName}, {$pull: {items: {_id: itemId}}});
-            res.redirect("/" + listName);
+        res.redirect("/" + listName);
     } else {
         await Item.deleteOne({_id: itemId});
         res.redirect("/");
