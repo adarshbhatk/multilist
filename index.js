@@ -13,7 +13,7 @@ dotenv.config();
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static("public"));
 
-mongoose.connect(`mongodb+srv://adarshbhatk:${process.env.MONGODB_PASSWORD}@todolist.d6ynjua.mongodb.net/?retryWrites=true&w=majority&appName=ToDoList`);
+mongoose.connect(`mongodb+srv://adarshbhatk:${process.env.MONGODB_PASSWORD}@todolist.d6ynjua.mongodb.net/?retryWrites=true&w=majority&appName=ToDoList`, { ssl: true });
 
 const itemsSchema = new mongoose.Schema({
     name: String,
