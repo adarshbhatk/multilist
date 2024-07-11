@@ -63,7 +63,7 @@ async function getListItems() {
 
   app.get("/", async (req, res) => {
     const items = await getListItems();
-    if(items.length === 0) {
+    if(items && items.length === 0) {
         Item.insertMany(defaultItems);
         res.redirect("/");
     } else {
